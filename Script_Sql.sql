@@ -91,3 +91,72 @@ END;
 $$ LANGUAGE plpgsql;
 
 SELECT teste_rollback();
+
+-- Criação de índices para otimização
+-- Índice na tabela de produtos para consultas rápidas por descrição
+CREATE INDEX idx_produtos_descricao ON tb_produtos (pro_descricao);
+-- Índice na tabela de vendas para consultas por horário
+CREATE INDEX idx_vendas_horario ON tb_vendas (ven_horario);
+
+-- Transações e Controle de Concorrência
+-- Função com Rollback
+CREATE OR REPLACE FUNCTION testar_rollback() RETURNS VOID AS $$
+BEGIN
+    BEGIN
+        INSERT INTO tb_produtos (pro_codigo, pro_descricao, pro_valor, pro_quantidade, tb_fornecedores_for_codigo)
+        VALUES (1, 'Produto Teste', 10.00, 100, 1);
+        RAISE EXCEPTION 'Forçando erro para teste de Rollback';
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE NOTICE 'Rollback realizado com sucesso';
+            ROLLBACK;
+    END;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Transações simultâneas para controle de concorrência
+BEGIN;
+    UPDATE tb_produtos SET pro_quantidade = pro_quantidade - 1 WHERE pro_codigo = 1;
+END;
+BEGIN;
+    UPDATE tb_produtos SET pro_quantidade = pro_quantidade - 2 WHERE pro_codigo = 1;
+END;
+
+-- Recuperação de dados e backup
+-- Função para verificar dados e realizar commit ou rollback
+CREATE OR REPLACE FUNCTION verificar_dados() RETURNS VOID AS $$
+BEGIN
+    IF (SELECT COUNT(*) FROM tb_produtos WHERE pro_quantidade < 0) > 0 THEN
+        RAISE EXCEPTION 'Dados inconsistentes detectados';
+    ELSE
+        COMMIT;
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Rotina de backup do banco de dados
+-- Script para ser executado no terminal
+pg_dump -U seu_usuario -h localhost -d nome_banco > caminho_para_backup.sql
+
+-- Restauração do backup
+pg_restore -U seu_usuario -h localhost -d novo_banco caminho_para_backup.sql
+
+-- Configuração de segurança
+-- Criação de usuários e grupos
+CREATE ROLE grupo_vendas;
+CREATE ROLE grupo_estoque;
+CREATE USER usuario_vendas PASSWORD 'senha123';
+CREATE USER usuario_estoque PASSWORD 'senha456';
+
+-- Concessão de privilégios
+GRANT SELECT, INSERT, UPDATE ON tb_vendas TO grupo_vendas;
+GRANT SELECT, UPDATE ON tb_produtos TO grupo_estoque;
+GRANT grupo_vendas TO usuario_vendas;
+GRANT grupo_estoque TO usuario_estoque;
+
+-- Teste de novos privilégios
+GRANT DELETE ON tb_vendas TO usuario_vendas;
+-- Verificar se outros usuários do grupo também receberam (deve ser "NÃO")

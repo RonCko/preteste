@@ -15,6 +15,7 @@ br\com\sistemas\login\TelaVenda$3.class
 br\com\sistemas\login\TelaEstoque.class
 br\com\sistemas\login\TelaHome$1.class
 br\com\sistemas\login\TelaVenda$8.class
+br\com\sistemas\login\DatabaseConnection.class
 br\com\sistemas\login\CadastroView$2.class
 br\com\sistemas\login\TelaLogin$2.class
 br\com\sistemas\login\TelaVenda.class

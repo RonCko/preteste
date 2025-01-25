@@ -10,4 +10,11 @@
         <maven.compiler.release>21</maven.compiler.release>
         <exec.mainClass>br.com.sistemas.telalogin.TelaLogin</exec.mainClass>
     </properties>
+    <dependencies>
+       <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.6.0</version>
+        </dependency> 
+    </dependencies>
 </project>
