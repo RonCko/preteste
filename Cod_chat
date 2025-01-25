@@ -1,5 +1,5 @@
 -- Código SQL organizado e documentado para atender aos requisitos especificados
-
+-- oioi
 -- Criação das tabelas
 CREATE TABLE tb_fornecedores (
     for_codigo BIGINT PRIMARY KEY,
